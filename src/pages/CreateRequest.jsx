@@ -59,188 +59,204 @@ const CreateRequest = () => {
   const hasEnoughCredits = (user?.timeCredits ?? 0) >= creditsNeeded;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Request Help</h1>
-        <p className="text-lg text-base-content/70">
-          Describe what you need. Location helps helpers near you find your request. Credits are only used when help is completed.
-        </p>
-      </div>
-
-      <div className="card bg-base-100 shadow-xl">
-        <div className="card-body p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="form-control w-full">
-              <label className="label pb-2">
-                <span className="label-text text-sm font-semibold text-base-content">Title</span>
-              </label>
-              <input
-                type="text"
-                name="title"
-                placeholder="e.g., Need help with form filling"
-                className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                value={formData.title}
-                onChange={handleChange}
-                required
-              />
+    <div className="max-w-6xl mx-auto animate-fade-in pb-4 h-[calc(100vh-120px)] flex flex-col">
+      {/* Integrated Header and Form Card */}
+      <div className="card bg-base-100 shadow-2xl border border-base-300 flex-1 overflow-hidden flex flex-col">
+        {/* Header Ribbon */}
+        <div className="bg-gradient-to-r from-primary via-purple-600 to-secondary p-4 text-primary-content flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">🆘</span>
+            <div>
+              <h1 className="text-xl font-black leading-tight uppercase tracking-tighter">Request Help</h1>
+              <p className="text-[10px] opacity-80 font-bold uppercase tracking-widest">Community Exchange Portal</p>
             </div>
+          </div>
+          <div className="hidden md:block text-right">
+            <p className="text-xs font-bold opacity-90">Instant Visibility to Helpers</p>
+            <p className="text-[10px] opacity-70">Credits transferred on completion</p>
+          </div>
+        </div>
 
-            <div className="form-control w-full">
-              <label className="label pb-2">
-                <span className="label-text text-sm font-semibold text-base-content">Description</span>
-              </label>
-              <textarea
-                name="description"
-                className="textarea textarea-bordered textarea-primary w-full h-32 focus:textarea-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                placeholder="Describe your help request in detail..."
-                value={formData.description}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="form-control w-full">
-                <label className="label pb-2">
-                  <span className="label-text text-sm font-semibold text-base-content">Category</span>
-                </label>
-                <select
-                  name="category"
-                  className="select select-bordered select-primary w-full focus:select-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                  value={formData.category}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="educational">📚 Educational Help</option>
-                  <option value="medical">🏥 Medical Support</option>
-                  <option value="technical">💻 Technical Help</option>
-                  <option value="physical">🏃 Physical Assistance</option>
-                  <option value="disaster">🌪️ Disaster Support</option>
-                  <option value="other">⚡ Other</option>
-                </select>
+        <form onSubmit={handleSubmit} className="p-6 flex-1 flex flex-col gap-6 overflow-y-auto lg:overflow-visible">
+          <div className="grid lg:grid-cols-2 gap-8 flex-1">
+            {/* Left Column: Core Details */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 border-b border-base-200 pb-2 mb-2 text-primary">
+                <span className="font-black text-xs uppercase tracking-widest">01. Service Information</span>
               </div>
 
-              <div className="form-control w-full">
-                <label className="label pb-2">
-                  <span className="label-text text-sm font-semibold text-base-content">Time needed (hours)</span>
-                </label>
-                <input
-                  type="number"
-                  name="timeRequired"
-                  className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                  value={formData.timeRequired}
-                  onChange={handleChange}
-                  min="0.25"
-                  max="12"
-                  step="0.25"
-                  required
-                />
-                <label className="label pt-1">
-                  <span className="label-text-alt text-xs">15 min (0.25) to 12 hours. This is the time credit cost when completed.</span>
-                </label>
-              </div>
-            </div>
-
-            <div className="form-control w-full">
-              <label className="cursor-pointer label pb-2">
-                <span className="label-text text-sm font-semibold text-base-content">Emergency Request</span>
-                <input
-                  type="checkbox"
-                  name="isEmergency"
-                  className="toggle toggle-primary"
-                  checked={formData.isEmergency}
-                  onChange={handleChange}
-                />
-              </label>
-              <label className="label pt-0">
-                <span className="label-text-alt text-xs">
-                  Emergency requests get priority and may be free of charge
-                </span>
-              </label>
-            </div>
-
-            <div className="divider my-6">Location Details</div>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="form-control w-full">
-                <label className="label pb-2">
-                  <span className="label-text text-sm font-semibold text-base-content">District</span>
+              <div className="form-control">
+                <label className="label py-1">
+                  <span className="label-text font-bold text-xs">Help Title</span>
                 </label>
                 <input
                   type="text"
-                  name="location.district"
-                  className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                  value={formData.location.district}
+                  name="title"
+                  placeholder="e.g., Grocery shopping assistance"
+                  className="input input-bordered input-sm focus:input-primary rounded-lg h-10 w-full"
+                  value={formData.title}
                   onChange={handleChange}
                   required
                 />
               </div>
-              <div className="form-control w-full">
-                <label className="label pb-2">
-                  <span className="label-text text-sm font-semibold text-base-content">Thana/Upazila</span>
+
+              <div className="form-control">
+                <label className="label py-1">
+                  <span className="label-text font-bold text-xs">Detailed Description</span>
                 </label>
-                <input
-                  type="text"
-                  name="location.thana"
-                  className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                  value={formData.location.thana}
+                <textarea
+                  name="description"
+                  className="textarea textarea-bordered textarea-sm focus:textarea-primary h-24 rounded-lg resize-none"
+                  placeholder="Provide essential details for the helper..."
+                  value={formData.description}
                   onChange={handleChange}
                   required
                 />
               </div>
-              <div className="form-control w-full">
-                <label className="label pb-2">
-                  <span className="label-text text-sm font-semibold text-base-content">Ward/Area</span>
-                </label>
-                <input
-                  type="text"
-                  name="location.ward"
-                  className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                  value={formData.location.ward}
-                  onChange={handleChange}
-                />
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="form-control">
+                  <label className="label py-1">
+                    <span className="label-text font-bold text-xs">Category</span>
+                  </label>
+                  <select
+                    name="category"
+                    className="select select-bordered select-sm focus:select-primary rounded-lg h-10"
+                    value={formData.category}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="educational">📚 Educational</option>
+                    <option value="medical">🏥 Medical</option>
+                    <option value="technical">💻 Technical</option>
+                    <option value="physical">🏃 Physical</option>
+                    <option value="disaster">🌪️ Disaster</option>
+                    <option value="other">⚡ Other</option>
+                  </select>
+                </div>
+                <div className="form-control">
+                  <label className="label py-1">
+                    <span className="label-text font-bold text-xs">Hours Needed</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="timeRequired"
+                    className="input input-bordered input-sm focus:input-primary rounded-lg h-10"
+                    value={formData.timeRequired}
+                    onChange={handleChange}
+                    min="0.25" max="12" step="0.25" required
+                  />
+                </div>
+              </div>
+
+              <div className="bg-error/5 p-4 rounded-xl border border-error/10 mt-auto">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="font-bold text-xs text-error block">URGENT SITUATION?</span>
+                    <p className="text-[10px] opacity-70 font-medium">Marking as emergency waives credit costs.</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    name="isEmergency"
+                    className="toggle toggle-error toggle-md"
+                    checked={formData.isEmergency}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="form-control w-full">
-              <label className="label pb-2">
-                <span className="label-text text-sm font-semibold text-base-content">Detailed Address</span>
-              </label>
-              <input
-                type="text"
-                name="location.address"
-                className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                value={formData.location.address}
-                onChange={handleChange}
-                placeholder="Street address, building number, etc."
-              />
-            </div>
+            {/* Right Column: Location & Summary */}
+            <div className="space-y-4 flex flex-col">
+              <div className="flex items-center gap-2 border-b border-base-200 pb-2 mb-2 text-secondary">
+                <span className="font-black text-xs uppercase tracking-widest">02. Location & Validation</span>
+              </div>
 
-            <div className={`alert ${hasEnoughCredits ? "alert-info" : "alert-warning"}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <span>
-                {formData.isEmergency
-                  ? "Emergency: no credits needed. May be covered by NGO pools."
-                  : `When help is completed, this will use ${formData.timeRequired} time credit(s). You have ${user?.timeCredits ?? 0} credits. ${!hasEnoughCredits ? "Earn more by helping others, or mark as emergency if urgent." : ""}`}
-              </span>
-            </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="form-control">
+                  <label className="label py-1">
+                    <span className="label-text font-bold text-xs">District</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="location.district"
+                    className="input input-bordered input-sm focus:input-secondary rounded-lg h-10"
+                    value={formData.location.district}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="form-control">
+                  <label className="label py-1">
+                    <span className="label-text font-bold text-xs">Thana</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="location.thana"
+                    className="input input-bordered input-sm focus:input-secondary rounded-lg h-10"
+                    value={formData.location.thana}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="form-control">
+                  <label className="label py-1">
+                    <span className="label-text font-bold text-xs">Ward</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="location.ward"
+                    className="input input-bordered input-sm focus:input-secondary rounded-lg h-10"
+                    value={formData.location.ward}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
 
-            <div className="form-control mt-6">
+              <div className="form-control">
+                <label className="label py-1">
+                  <span className="label-text font-bold text-xs">Specific Address</span>
+                </label>
+                <input
+                  type="text"
+                  name="location.address"
+                  className="input input-bordered input-sm focus:input-secondary rounded-lg h-10"
+                  value={formData.location.address}
+                  placeholder="Street, Building, Flat etc."
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Summary Alert */}
+              <div className={`mt-auto p-4 rounded-xl border flex items-start gap-3 transition-colors ${formData.isEmergency ? "bg-error/10 border-error/20" : hasEnoughCredits ? "bg-primary/10 border-primary/20" : "bg-warning/10 border-warning/20"}`}>
+                <div className="text-2xl mt-1">
+                  {formData.isEmergency ? "🚨" : hasEnoughCredits ? "✅" : "⚠️"}
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs leading-none mb-1">
+                    {formData.isEmergency ? "Emergency Service" : hasEnoughCredits ? "Credits Validated" : "Low Credits Warning"}
+                  </h4>
+                  <p className="text-[10px] font-medium opacity-80 leading-tight">
+                    {formData.isEmergency
+                      ? "NGO prioritized. No personal cost."
+                      : `Cost: ${formData.timeRequired} credit(s). Current: ${user?.timeCredits ?? 0}.`
+                    }
+                  </p>
+                </div>
+              </div>
+
               <button
                 type="submit"
-                className={`btn btn-primary btn-lg ${loading ? "loading" : ""}`}
+                className={`btn btn-block btn-md border-none text-white shadow-xl shadow-primary/20 rounded-xl transition-all h-12 mt-4 ${formData.isEmergency ? "bg-error hover:bg-error-focus" : "bg-primary hover:bg-primary-focus"
+                  } ${loading ? "loading" : ""}`}
                 disabled={loading}
               >
-                {loading ? "Creating..." : "Create help request"}
+                {!loading && <span className="mr-2">✨</span>}
+                {loading ? "Processing..." : "Submit Request Now"}
               </button>
-              {!formData.isEmergency && !hasEnoughCredits && (
-                <p className="text-sm text-warning mt-2">You have fewer than {creditsNeeded} credits. You can still post; earn credits by helping others before your help is completed, or mark as emergency if urgent.</p>
-              )}
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
   );

@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useAuth } from "../provider/AuthProvider";
 import { helpRequestAPI } from "../utils/api";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend
+} from 'recharts';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { user, loading: authLoading, loadUser } = useAuth();
   const [stats, setStats] = useState({
     myRequests: 0,
@@ -15,6 +20,12 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (user && !authLoading) {
+      // Redirect Admin to Admin Dashboard
+      if (user.role === "admin") {
+        navigate("/admin-dashboard");
+        return;
+      }
+
       // Check if unverified NGO
       if (user.role === "ngo" && !user.ngoDetails?.isVerified) {
         setLoading(false);
@@ -238,6 +249,86 @@ const Dashboard = () => {
             <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${stat.color} rounded-b-2xl`}></div>
           </div>
         ))}
+      </div>
+
+      {/* Visual Analytics Section */}
+      <div className="grid lg:grid-cols-2 gap-8 mb-10 animate-slide-up" style={{ animationDelay: '0.15s' }}>
+        {/* Activity Distribution Chart */}
+        <div className="card bg-base-100 shadow-2xl border border-base-200">
+          <div className="card-body p-6">
+            <h2 className="card-title text-xl mb-4 font-black flex items-center gap-2">
+              <span className="text-primary text-2xl">📊</span>
+              Community Participation
+            </h2>
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={[
+                    { name: 'Requests', count: stats.myRequests, color: '#3b82f6' },
+                    { name: 'Helps', count: stats.myHelps, color: '#10b981' },
+                    { name: 'Total Pub', count: stats.availableRequests, color: '#f59e0b' }
+                  ]}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                  <YAxis axisLine={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: 'white', borderRadius: '12px', border: 'none', shadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}
+                  />
+                  <Bar
+                    dataKey="count"
+                    radius={[10, 10, 0, 0]}
+                    barSize={45}
+                  >
+                    {[0, 1, 2].map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index === 0 ? '#3b82f6' : index === 1 ? '#10b981' : '#f59e0b'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-xs text-base-content/50 mt-4 italic">Comparison of your personal requests vs helps provided to neighbors.</p>
+          </div>
+        </div>
+
+        {/* Impact Breakdown (Pie Chart) */}
+        <div className="card bg-base-100 shadow-2xl border border-base-200">
+          <div className="card-body p-6">
+            <h2 className="card-title text-xl mb-4 font-black flex items-center gap-2">
+              <span className="text-secondary text-2xl">🥧</span>
+              Help Impact Share
+            </h2>
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Requests', value: stats.myRequests || 1 },
+                      { name: 'Helps', value: stats.myHelps || 1 },
+                      { name: 'Other', value: 2 }
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={8}
+                    dataKey="value"
+                  >
+                    <Cell fill="#6366f1" />
+                    <Cell fill="#a855f7" />
+                    <Cell fill="#ec4899" />
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ backgroundColor: 'white', borderRadius: '12px', border: 'none' }}
+                  />
+                  <Legend verticalAlign="bottom" height={36} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-xs text-base-content/50 mt-4 italic">Visual breakdown of your engagement footprint in the platform.</p>
+          </div>
+        </div>
       </div>
 
       {/* Quick Actions */}

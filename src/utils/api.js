@@ -69,6 +69,10 @@ export const authAPI = {
   }),
   getUser: (id) => apiRequest(`/users/${id}`),
   getMe: () => apiRequest("/auth/me"),
+  updateProfile: (userData) => apiRequest("/auth/update", {
+    method: "PUT",
+    body: JSON.stringify(userData),
+  }),
 };
 
 export const adminAPI = {

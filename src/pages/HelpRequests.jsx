@@ -7,10 +7,12 @@ const HelpRequests = () => {
   const { user, loading: authLoading, loadUser } = useAuth();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
   const [filters, setFilters] = useState({
     category: "",
     isEmergency: "",
     status: "pending",
+    page: 1
   });
 
   useEffect(() => {
@@ -22,8 +24,9 @@ const HelpRequests = () => {
   const loadRequests = async () => {
     setLoading(true);
     try {
-      const data = await helpRequestAPI.getAll(filters);
+      const { requests: data, pagination: pagin } = await helpRequestAPI.getAll(filters);
       setRequests(data);
+      setPagination(pagin);
     } catch (error) {
       toast.error("Failed to load help requests");
     } finally {
@@ -160,7 +163,8 @@ const HelpRequests = () => {
             const helperId = request.helper?._id || request.helper;
             const isMyRequest = requesterId === user?.id || requesterId === user?._id;
             const amIHelper = helperId === user?.id || helperId === user?._id;
-            const canComplete = (request.status === "assigned" || request.status === "in_progress") && (amIHelper || isMyRequest);
+            // CORE RULE: Only the seeker (isMyRequest) can confirm completion
+            const canComplete = (request.status === "assigned" || request.status === "in_progress") && isMyRequest;
 
             return (
               <div
@@ -195,8 +199,8 @@ const HelpRequests = () => {
                           📍 {request.location?.district}, {request.location?.thana}
                         </div>
                         <div className={`badge ${request.status === "pending" ? "badge-warning" :
-                            request.status === "completed" ? "badge-success" :
-                              "badge-info"
+                          request.status === "completed" ? "badge-success" :
+                            "badge-info"
                           }`}>
                           {request.status}
                         </div>
@@ -243,6 +247,29 @@ const HelpRequests = () => {
           })
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {pagination.totalPages > 1 && (
+        <div className="flex justify-center mt-10 gap-2">
+          <button
+            className="btn btn-primary btn-outline"
+            disabled={pagination.page <= 1}
+            onClick={() => setFilters({ ...filters, page: pagination.page - 1 })}
+          >
+            Previous
+          </button>
+          <div className="flex items-center px-4 font-bold text-lg">
+            Page {pagination.page} of {pagination.totalPages}
+          </div>
+          <button
+            className="btn btn-primary btn-outline"
+            disabled={pagination.page >= pagination.totalPages}
+            onClick={() => setFilters({ ...filters, page: pagination.page + 1 })}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

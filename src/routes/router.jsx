@@ -1,8 +1,11 @@
 import { createBrowserRouter } from "react-router";
 import Layout from "../components/Layout";
+import DashboardLayout from "../components/DashboardLayout";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import AboutUs from "../pages/AboutUs";
+import Motivation from "../pages/Motivation";
 import Dashboard from "../pages/Dashboard";
 import HelpRequests from "../pages/HelpRequests";
 import Profile from "../pages/Profile";
@@ -32,68 +35,53 @@ const router = createBrowserRouter([
         element: <Register />,
       },
       {
+        path: "about-us",
+        element: <AboutUs />,
+      },
+      {
+        path: "motivation",
+        element: <Motivation />,
+      },
+    ],
+  },
+  {
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
+    children: [
+      {
         path: "dashboard",
-        element: (
-          <PrivateRoute>
-            <Dashboard />
-          </PrivateRoute>
-        ),
+        element: <Dashboard />,
       },
       {
         path: "help-requests",
-        element: (
-          <PrivateRoute>
-            <HelpRequests />
-          </PrivateRoute>
-        ),
+        element: <HelpRequests />,
       },
       {
         path: "create-request",
-        element: (
-          <PrivateRoute>
-            <CreateRequest />
-          </PrivateRoute>
-        ),
+        element: <CreateRequest />,
       },
       {
         path: "profile",
-        element: (
-          <PrivateRoute>
-            <Profile />
-          </PrivateRoute>
-        ),
+        element: <Profile />,
       },
       {
         path: "transactions",
-        element: (
-          <PrivateRoute>
-            <Transactions />
-          </PrivateRoute>
-        ),
+        element: <Transactions />,
       },
       {
         path: "my-activity",
-        element: (
-          <PrivateRoute>
-            <MyActivity />
-          </PrivateRoute>
-        ),
+        element: <MyActivity />,
       },
       {
         path: "admin-dashboard",
-        element: (
-          <PrivateRoute>
-            <AdminDashboard />
-          </PrivateRoute>
-        ),
+        element: <AdminDashboard />,
       },
       {
         path: "emergencies",
-        element: (
-          <PrivateRoute>
-            <NgoEmergencies />
-          </PrivateRoute>
-        ),
+        element: <NgoEmergencies />,
       },
     ],
   },

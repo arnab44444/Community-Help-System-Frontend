@@ -1,9 +1,12 @@
-import { Outlet, Link, useNavigate } from "react-router";
+import { Outlet, Link, useNavigate, useLocation } from "react-router";
 import { useAuth } from "../provider/AuthProvider";
 
 const Layout = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
 
   const handleLogout = () => {
     logout();
@@ -11,129 +14,168 @@ const Layout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-base-200 via-base-100 to-base-200">
-      <div className="navbar bg-gradient-to-r from-primary via-purple-600 to-secondary text-primary-content shadow-2xl sticky top-0 z-50 backdrop-blur-sm bg-opacity-95">
-        <div className="container mx-auto">
-          <div className="flex-1">
-            <Link to="/" className="btn btn-ghost text-xl md:text-2xl font-bold hover:bg-white/20 transition-all duration-300">
-              <span className="text-3xl mr-2">🤝</span>
-              <span className="hidden sm:inline">Community Help Exchange</span>
-              <span className="sm:hidden">CHE Platform</span>
-            </Link>
-          </div>
-          <div className="flex-none">
-            <ul className="menu menu-horizontal px-1 gap-1">
-              <li>
-                <Link to="/" className="hover:bg-white/20 rounded-lg transition-all">
-                  Home
+    <div className="min-h-screen bg-base-100 selection:bg-primary selection:text-white">
+      {!isAuthPage && (
+        /* Floating Modern Navbar */
+        <nav className="fixed top-0 left-0 right-0 z-[100] px-4 py-3 pointer-events-none">
+          <div className="container mx-auto max-w-7xl pointer-events-auto">
+            <div className="navbar bg-base-100/70 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] rounded-2xl px-4 md:px-6">
+              <div className="navbar-start">
+                {/* Mobile Menu Dropdown */}
+                <div className="dropdown">
+                  <label tabIndex={0} className="btn btn-ghost lg:hidden ring-offset-2 ring-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
+                    </svg>
+                  </label>
+                  <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-2xl bg-base-100 rounded-box w-52 border border-base-200">
+                    <li><Link to="/">Home</Link></li>
+                    <li><Link to="/about-us">About Us</Link></li>
+                    <li><Link to="/motivation">Our Motivation</Link></li>
+                    {user ? (
+                      <>
+                        <li><Link to={user.role === 'admin' ? '/admin-dashboard' : '/dashboard'}>Dashboard</Link></li>
+                        <li><button onClick={handleLogout} className="text-error font-semibold">Logout</button></li>
+                      </>
+                    ) : (
+                      <>
+                        <li><Link to="/login">Login</Link></li>
+                        <li><Link to="/register" className="text-secondary font-bold">Register</Link></li>
+                      </>
+                    )}
+                  </ul>
+                </div>
+
+                {/* Logo / Brand */}
+                <Link to="/" className="flex items-center gap-2 group transition-all duration-300">
+                  <div className="w-10 h-10 bg-gradient-to-tr from-primary to-secondary rounded-xl flex items-center justify-center text-2xl shadow-lg transform group-hover:rotate-12 group-hover:scale-110 transition-all">
+                    🤝
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-lg md:text-xl font-black tracking-tighter leading-none bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                      COMMUNITY
+                    </span>
+                    <span className="text-[10px] font-bold tracking-[0.2em] opacity-40 uppercase">Help Exchange</span>
+                  </div>
                 </Link>
-              </li>
-              {user ? (
-                <>
+              </div>
+
+              <div className="navbar-end hidden lg:flex">
+                <ul className="menu menu-horizontal px-1 gap-2 items-center font-bold text-sm tracking-wide">
                   <li>
-                    <Link to="/dashboard" className="hover:bg-white/20 rounded-lg transition-all">
-                      Dashboard
+                    <Link to="/" className="hover:text-primary transition-colors py-2 px-3 rounded-xl hover:bg-primary/5">
+                      Home
                     </Link>
                   </li>
-                  {user.role === "admin" && (
-                    <li>
-                      <Link to="/admin-dashboard" className="hover:bg-white/20 rounded-lg transition-all bg-error/20 border border-error/50">
-                        Admin Dashboard
-                      </Link>
-                    </li>
-                  )}
-                  {user.role === "ngo" && user.ngoDetails?.isVerified && (
-                    <li>
-                      <Link to="/emergencies" className="hover:bg-white/20 rounded-lg transition-all bg-error text-white animate-pulse font-bold">
-                        🚨 Emergencies
-                      </Link>
-                    </li>
-                  )}
                   <li>
-                    <Link to="/help-requests" className="hover:bg-white/20 rounded-lg transition-all">
-                      Help Requests
+                    <Link to="/about-us" className="hover:text-primary transition-colors py-2 px-3 rounded-xl hover:bg-primary/5">
+                      About
                     </Link>
                   </li>
-                  {/* Credits Display - Hide for Admin */}
-                  {user.role !== "admin" && (
-                    <li>
-                      <div className="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg border border-white/20">
-                        <span className="text-xl">⏱️</span>
-                        <div className="flex flex-col">
-                          <span className="text-xs opacity-75">Credits</span>
-                          <span className="font-bold">{user?.timeCredits ?? 0}</span>
+                  <li>
+                    <Link to="/motivation" className="hover:text-primary transition-colors py-2 px-3 rounded-xl hover:bg-primary/5 whitespace-nowrap">
+                      Motivation
+                    </Link>
+                  </li>
+
+                  <div className="divider divider-horizontal mx-2 h-6 my-auto opacity-10"></div>
+
+                  {user ? (
+                    <div className="flex items-center gap-3">
+                      <Link
+                        to={user.role === 'admin' ? '/admin-dashboard' : '/dashboard'}
+                        className="btn btn-primary btn-sm rounded-xl px-5 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all border-none"
+                      >
+                        Dashboard
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="btn btn-ghost btn-sm rounded-xl hover:bg-error/10 hover:text-error transition-all"
+                      >
+                        Logout
+                      </button>
+                      <div className="avatar placeholder online">
+                        <div className="bg-primary/10 text-primary rounded-xl w-8 h-8 flex items-center justify-center border border-primary/20">
+                          <span className="text-xs font-black uppercase">{user.name?.charAt(0)}</span>
                         </div>
                       </div>
-                    </li>
-                  )}
-                  {/* Request Help - Hide for Admin */}
-                  {user.role !== "admin" && (
-                    <li>
-                      <Link to="/create-request" className="btn btn-sm btn-accent rounded-full">
-                        Request Help
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Link to="/login" className="btn btn-ghost btn-sm rounded-xl hover:bg-primary/5">
+                        Login
                       </Link>
-                    </li>
-                  )}
-                  {/* Hide My Activity for Admins */}
-                  {user.role !== "admin" && (
-                    <li>
-                      <Link to="/my-activity" className="hover:bg-white/20 rounded-lg transition-all">
-                        My Activity
+                      <Link to="/register" className="btn btn-secondary btn-sm rounded-xl px-5 text-white shadow-lg shadow-secondary/20 hover:shadow-secondary/40 border-none transition-all">
+                        Register
                       </Link>
-                    </li>
+                    </div>
                   )}
-                  <li>
-                    <Link to="/transactions" className="hover:bg-white/20 rounded-lg transition-all">
-                      Credits & Transactions
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/profile" className="hover:bg-white/20 rounded-lg transition-all">
-                      Profile
-                    </Link>
-                  </li>
-                  <li>
-                  </li>
-                  <li>
-                    <button
-                      onClick={handleLogout}
-                      className="btn btn-sm btn-ghost hover:bg-white/20 rounded-lg"
-                    >
-                      Logout
-                    </button>
-                  </li>
-                </>
-              ) : (
-                <>
-                  <li>
-                    <Link to="/login" className="hover:bg-white/20 rounded-lg transition-all">
-                      Login
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/register" className="btn btn-sm btn-accent rounded-full">
-                      Register
-                    </Link>
-                  </li>
-                </>
-              )}
-            </ul>
+                </ul>
+              </div>
+
+              {/* Mobile End (Avatar or Shortcut) */}
+              <div className="navbar-end lg:hidden flex gap-2">
+                {user && (
+                  <div className="avatar placeholder online">
+                    <div className="bg-primary/10 text-primary rounded-xl w-10 h-10 flex items-center justify-center">
+                      <span className="text-sm font-black">{user.name?.charAt(0)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <main className="min-h-screen">
+        </nav>
+      )}
+
+      <main className={`${isAuthPage ? 'pt-0' : 'pt-24'} min-h-screen`}>
         <Outlet />
       </main>
-      <footer className="footer footer-center p-10 bg-gradient-to-r from-base-300 to-base-200 text-base-content mt-20 border-t-2 border-primary/20">
-        <div>
-          <p className="font-bold text-xl mb-2">
-            <span className="text-2xl mr-2">🤝</span>
-            Community Help Exchange Platform
-          </p>
-          <p className="text-base-content/80">A charity platform: time is the currency. No money — give and receive help in your community.</p>
-          <p className="text-sm text-base-content/60 mt-2">© 2026 Community Help Exchange. For community support only.</p>
-        </div>
-      </footer>
+
+      {!isAuthPage && (
+        <footer className="bg-base-200/50 border-t border-base-200 mt-20 pt-16 pb-8">
+          <div className="container mx-auto px-6 max-w-7xl">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+              <div className="md:col-span-2 space-y-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-3xl">🤝</div>
+                  <h2 className="text-2xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">COMMUNITY HELP</h2>
+                </div>
+                <p className="max-w-md text-base-content/60 leading-relaxed font-medium">
+                  Empowering neighbors through time-based mutual aid. We believe every individual has value,
+                  and every community grows stronger when we share our time and skills.
+                </p>
+                <div className="flex gap-4">
+                  <button className="btn btn-circle btn-sm btn-ghost bg-base-200">f</button>
+                  <button className="btn btn-circle btn-sm btn-ghost bg-base-200">🐦</button>
+                  <button className="btn btn-circle btn-sm btn-ghost bg-base-200">📸</button>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="font-black text-sm uppercase tracking-widest opacity-80">Platform</h3>
+                <ul className="space-y-2 font-medium text-base-content/60">
+                  <li><Link to="/" className="hover:text-primary transition-colors">Home</Link></li>
+                  <li><Link to="/about-us" className="hover:text-primary transition-colors">About Us</Link></li>
+                  <li><Link to="/motivation" className="hover:text-primary transition-colors">Our Motivation</Link></li>
+                </ul>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="font-black text-sm uppercase tracking-widest opacity-80">Trust & Safety</h3>
+                <ul className="space-y-2 font-medium text-base-content/60">
+                  <li><Link className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+                  <li><Link className="hover:text-primary transition-colors">Terms of Service</Link></li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="pt-8 border-t border-base-content/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-bold opacity-40 uppercase tracking-widest text-center md:text-left">
+              <p>© 2026 Community Help Exchange Platform.</p>
+            </div>
+          </div>
+        </footer>
+      )}
     </div>
   );
 };

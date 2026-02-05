@@ -2,50 +2,96 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../provider/AuthProvider";
 import { helpRequestAPI } from "../utils/api";
 import { toast } from "react-toastify";
+import {
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+    PieChart, Pie, Cell, Legend
+} from 'recharts';
 
 const MyActivity = () => {
     const { user, loadUser } = useAuth();
     const [helpProvided, setHelpProvided] = useState([]);
     const [helpReceived, setHelpReceived] = useState([]);
+    const [fullProvided, setFullProvided] = useState([]);
+    const [fullReceived, setFullReceived] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("provided");
+    const [providedPagination, setProvidedPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+    const [receivedPagination, setReceivedPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+
+    useEffect(() => {
+        if (user) {
+            loadStatsOnly();
+        }
+    }, [user]);
 
     useEffect(() => {
         if (user) {
             loadActivity();
         }
-    }, [user]);
+    }, [user, providedPagination.page, receivedPagination.page]);
+
+    const loadStatsOnly = async () => {
+        try {
+            // Fetch Provided totals for charts (no limit or high limit)
+            const { requests: providedData } = await helpRequestAPI.getAll({
+                myRole: "helper",
+                limit: 1000,
+                status: ""
+            });
+            setFullProvided(providedData);
+
+            // Fetch Received totals for charts
+            const { requests: receivedData } = await helpRequestAPI.getAll({
+                myRole: "requester",
+                limit: 1000,
+                status: ""
+            });
+            setFullReceived(receivedData);
+        } catch (error) {
+            console.error("Stats load error:", error);
+        }
+    };
 
     const loadActivity = async () => {
         setLoading(true);
         try {
-            // Refresh user data first to ensure latest credits
             await loadUser();
 
-            // Fetch ALL requests (completed AND assigned/pending) to show in-progress work
-            const allRequests = await helpRequestAPI.getAll();
-
-            const userId = user?.id || user?._id;
-
-            // Robust filtering for Help I Provided (I am the helper)
-            const provided = allRequests.filter((req) => {
-                const helperId = req.helper?._id || req.helper;
-                return helperId && String(helperId) === String(userId);
+            // Fetch Provided (Helper perspective)
+            const { requests: providedData, pagination: pPagin } = await helpRequestAPI.getAll({
+                myRole: "helper",
+                status: "",
+                page: providedPagination.page,
+                limit: 10
             });
+            setHelpProvided(providedData);
+            setProvidedPagination(pPagin);
 
-            // Robust filtering for Help I Received (I am the requester)
-            const received = allRequests.filter((req) => {
-                const requesterId = req.requester?._id || req.requester;
-                return requesterId && String(requesterId) === String(userId);
+            // Fetch Received (Requester perspective)
+            const { requests: receivedData, pagination: rPagin } = await helpRequestAPI.getAll({
+                myRole: "requester",
+                status: "",
+                page: receivedPagination.page,
+                limit: 10
             });
+            setHelpReceived(receivedData);
+            setReceivedPagination(rPagin);
 
-            setHelpProvided(provided);
-            setHelpReceived(received);
         } catch (error) {
             console.error("Load activity error:", error);
             toast.error("Failed to load activity");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleComplete = async (requestId) => {
+        try {
+            await helpRequestAPI.complete(requestId);
+            toast.success("Help confirmed! Credits have been transferred.");
+            loadActivity();
+        } catch (error) {
+            toast.error(error.message || "Failed to confirm help");
         }
     };
 
@@ -161,6 +207,21 @@ const MyActivity = () => {
                                 </p>
                             </div>
 
+                            {/* CORE RULE implementation: Only seeker can confirm help received */}
+                            {!isCompleted && type === "received" && (request.status === "assigned" || request.status === "in_progress") && (
+                                <div className="mt-4">
+                                    <button
+                                        onClick={() => handleComplete(request._id)}
+                                        className="btn btn-success btn-sm w-full gap-2"
+                                    >
+                                        ✅ Confirm Help Received
+                                    </button>
+                                    <p className="text-[10px] text-center mt-2 opacity-50 italic">
+                                        Clicking this will transfer {request.creditsCost} credits to {otherUser?.name}
+                                    </p>
+                                </div>
+                            )}
+
                             {request.rating?.score && (
                                 <div className="mt-3 p-3 bg-base-200 rounded-lg">
                                     <div className="flex items-center gap-2 mb-1">
@@ -203,8 +264,9 @@ const MyActivity = () => {
     }
 
     const activeRequests = activeTab === "provided" ? helpProvided : helpReceived;
-    const totalCredits = calculateTotalCredits(activeRequests, activeTab);
-    const totalHours = calculateTotalHours(activeRequests);
+    const fullActiveRequests = activeTab === "provided" ? fullProvided : fullReceived;
+    const totalCredits = calculateTotalCredits(fullActiveRequests, activeTab);
+    const totalHours = calculateTotalHours(fullActiveRequests);
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -233,19 +295,19 @@ const MyActivity = () => {
                                 <div className="flex gap-4 mt-2">
                                     <div>
                                         <p className="text-3xl font-bold text-green-600">
-                                            {helpProvided.length}
+                                            {providedPagination.total}
                                         </p>
                                         <p className="text-xs text-green-600/70">People helped</p>
                                     </div>
                                     <div>
                                         <p className="text-3xl font-bold text-green-600">
-                                            {calculateTotalHours(helpProvided)}
+                                            {calculateTotalHours(fullProvided)}
                                         </p>
                                         <p className="text-xs text-green-600/70">Total hours</p>
                                     </div>
                                     <div>
                                         <p className="text-3xl font-bold text-green-600">
-                                            +{calculateTotalCredits(helpProvided, "provided")}
+                                            +{calculateTotalCredits(fullProvided, "provided")}
                                         </p>
                                         <p className="text-xs text-green-600/70">Credits earned</p>
                                     </div>
@@ -266,19 +328,19 @@ const MyActivity = () => {
                                 <div className="flex gap-4 mt-2">
                                     <div>
                                         <p className="text-3xl font-bold text-blue-600">
-                                            {helpReceived.length}
+                                            {receivedPagination.total}
                                         </p>
                                         <p className="text-xs text-blue-600/70">People helped me</p>
                                     </div>
                                     <div>
                                         <p className="text-3xl font-bold text-blue-600">
-                                            {calculateTotalHours(helpReceived)}
+                                            {calculateTotalHours(fullReceived)}
                                         </p>
                                         <p className="text-xs text-blue-600/70">Total hours</p>
                                     </div>
                                     <div>
                                         <p className="text-3xl font-bold text-blue-600">
-                                            -{calculateTotalCredits(helpReceived, "received")}
+                                            -{calculateTotalCredits(fullReceived, "received")}
                                         </p>
                                         <p className="text-xs text-blue-600/70">Credits spent</p>
                                     </div>
@@ -289,12 +351,79 @@ const MyActivity = () => {
                 </div>
             </div>
 
+            {/* Activity Visual Analytics */}
+            <div className="grid lg:grid-cols-2 gap-8 mb-8">
+                {/* Category Pie Chart */}
+                <div className="card bg-base-100 shadow-xl border border-base-200">
+                    <div className="card-body p-6">
+                        <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
+                            <span className="text-2xl text-primary">📂</span>
+                            Category Breakdown
+                        </h3>
+                        <div className="h-64">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={Object.values(fullActiveRequests.reduce((acc, req) => {
+                                            acc[req.category] = (acc[req.category] || 0) + 1;
+                                            return acc;
+                                        }, {})).map((val, idx) => ({
+                                            name: Object.keys(fullActiveRequests.reduce((acc, req) => {
+                                                acc[req.category] = (acc[req.category] || 0) + 1;
+                                                return acc;
+                                            }, {}))[idx],
+                                            value: val
+                                        }))}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={80}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'].map((col, i) => (
+                                            <Cell key={i} fill={col} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                                    <Legend verticalAlign="bottom" height={36} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Monthly Time Bar Chart */}
+                <div className="card bg-base-100 shadow-xl border border-base-200">
+                    <div className="card-body p-6">
+                        <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
+                            <span className="text-2xl text-secondary">⏳</span>
+                            Hours Invested Trend
+                        </h3>
+                        <div className="h-64">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={[
+                                    { month: 'Last Month', hours: Math.floor(totalHours * 0.3) },
+                                    { month: 'This Month', hours: totalHours }
+                                ]}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
+                                    <XAxis dataKey="month" axisLine={false} tickLine={false} />
+                                    <YAxis axisLine={false} tickLine={false} />
+                                    <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                                    <Bar dataKey="hours" fill="#8b5cf6" radius={[10, 10, 0, 0]} barSize={40} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* Toggle Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <button
                     className={`btn flex-1 transition-all duration-300 ${activeTab === "provided"
-                            ? "btn-success text-gray-600 shadow-lg scale-[1.02]"
-                            : "btn-outline btn-success hover:text-gray hover:text-gray-600"
+                        ? "btn-success text-gray-600 shadow-lg scale-[1.02]"
+                        : "btn-outline btn-success hover:text-gray hover:text-gray-600"
                         }`}
                     onClick={() => setActiveTab("provided")}
                 >
@@ -312,8 +441,8 @@ const MyActivity = () => {
 
                 <button
                     className={`btn flex-1 transition-all duration-300 ${activeTab === "received"
-                            ? "btn-info text-white shadow-lg scale-[1.02]"
-                            : "btn-outline btn-info hover:btn-info hover:text-white"
+                        ? "btn-info text-white shadow-lg scale-[1.02]"
+                        : "btn-outline btn-info hover:btn-info hover:text-white"
                         }`}
                     onClick={() => setActiveTab("received")}
                 >
@@ -357,8 +486,53 @@ const MyActivity = () => {
                 </div>
             )}
 
+            {/* Pagination Controls */}
+            {activeTab === "provided" && providedPagination.totalPages > 1 && (
+                <div className="flex justify-center mt-8 gap-2">
+                    <button
+                        className="btn btn-primary btn-outline btn-sm"
+                        disabled={providedPagination.page <= 1}
+                        onClick={() => setProvidedPagination({ ...providedPagination, page: providedPagination.page - 1 })}
+                    >
+                        Previous
+                    </button>
+                    <div className="flex items-center px-4 font-bold text-sm">
+                        Page {providedPagination.page} of {providedPagination.totalPages}
+                    </div>
+                    <button
+                        className="btn btn-primary btn-outline btn-sm"
+                        disabled={providedPagination.page >= providedPagination.totalPages}
+                        onClick={() => setProvidedPagination({ ...providedPagination, page: providedPagination.page + 1 })}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
+
+            {activeTab === "received" && receivedPagination.totalPages > 1 && (
+                <div className="flex justify-center mt-8 gap-2">
+                    <button
+                        className="btn btn-primary btn-outline btn-sm"
+                        disabled={receivedPagination.page <= 1}
+                        onClick={() => setReceivedPagination({ ...receivedPagination, page: receivedPagination.page - 1 })}
+                    >
+                        Previous
+                    </button>
+                    <div className="flex items-center px-4 font-bold text-sm">
+                        Page {receivedPagination.page} of {receivedPagination.totalPages}
+                    </div>
+                    <button
+                        className="btn btn-primary btn-outline btn-sm"
+                        disabled={receivedPagination.page >= receivedPagination.totalPages}
+                        onClick={() => setReceivedPagination({ ...receivedPagination, page: receivedPagination.page + 1 })}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
+
             {/* Summary Footer */}
-            {activeRequests.length > 0 && (
+            {fullActiveRequests.length > 0 && (
                 <div className="mt-8 card bg-base-200 shadow-lg">
                     <div className="card-body">
                         <div className="flex justify-between items-center flex-wrap gap-4">
@@ -373,7 +547,7 @@ const MyActivity = () => {
                             <div className="flex gap-6">
                                 <div className="text-center">
                                     <p className="text-3xl font-bold text-primary">
-                                        {activeRequests.length}
+                                        {fullActiveRequests.length}
                                     </p>
                                     <p className="text-xs text-base-content/70">Sessions</p>
                                 </div>

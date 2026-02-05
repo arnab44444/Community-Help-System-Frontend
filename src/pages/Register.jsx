@@ -66,7 +66,6 @@ const Register = () => {
             return;
         }
 
-        // Validate NGO fields if role is NGO
         if (formData.role === "ngo") {
             if (!formData.ngoDetails.organizationName || !formData.ngoDetails.registrationNumber) {
                 toast.error("Please fill in all NGO details!");
@@ -77,277 +76,148 @@ const Register = () => {
         setLoading(true);
         try {
             const { confirmPassword, ...registerData } = formData;
-
-            // Only include ngoDetails if role is NGO
             if (registerData.role !== "ngo") {
                 delete registerData.ngoDetails;
             }
-
             await register(registerData);
             navigate("/dashboard", { replace: true });
         } catch (error) {
-            // Error handled in AuthProvider
+            // Handled in provider
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/20 via-purple-500/20 to-secondary/20 py-12 px-4 relative overflow-hidden">
-            {/* Animated background */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute top-20 left-20 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float"></div>
-                <div className="absolute bottom-20 right-20 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }}></div>
-            </div>
+        <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex items-center justify-center p-4 relative overflow-hidden font-sans">
+            {/* Dynamic Background Elements */}
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/5 rounded-full blur-[120px] animate-pulse"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
 
-            <div className="card w-full max-w-2xl shadow-2xl bg-base-100 border-2 border-primary/20 animate-slide-up relative z-10">
-                <div className="card-body p-8">
-                    <div className="text-center mb-6">
-                        <div className="text-6xl mb-4 animate-float">🤝</div>
-                        <h2 className="text-4xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
-                            Join Our Community
-                        </h2>
-                        <p className="text-base-content/70">Create your account to start helping and receiving help</p>
+            <div className="w-full max-w-5xl bg-white shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)] rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row min-h-[720px] animate-fade-in relative z-10 border border-slate-100">
+
+                {/* Left Side: Branding & Experience */}
+                <div className="md:w-[40%] bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 p-10 flex flex-col justify-between text-white relative">
+                    <div className="relative z-10">
+                        <Link to="/" className="flex items-center gap-2 mb-12 group transition-all">
+                            <div className="w-10 h-10 bg-white shadow-lg rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform text-indigo-700">🤝</div>
+                            <span className="font-black text-xl tracking-tight">CommunityHelp</span>
+                        </Link>
+
+                        <div className="space-y-4">
+                            <h1 className="text-3xl font-black leading-[1.1] tracking-tighter">
+                                Start your <span className="text-indigo-200">impact</span> journey.
+                            </h1>
+                            <p className="text-indigo-100/80 text-base leading-relaxed max-w-[280px]">
+                                Join a circle of helpers and earn time credits by contributing to your neighborhood.
+                            </p>
+                        </div>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Personal Information */}
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="form-control w-full">
-                                <label className="label pb-2">
-                                    <span className="label-text text-sm font-semibold text-base-content">Full Name</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    placeholder="John Doe"
-                                    className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div className="form-control w-full">
-                                <label className="label pb-2">
-                                    <span className="label-text text-sm font-semibold text-base-content">Phone Number</span>
-                                </label>
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    placeholder="+880 1234567890"
-                                    className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                                    value={formData.phone}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="form-control w-full">
-                            <label className="label pb-2">
-                                <span className="label-text text-sm font-semibold text-base-content">Email</span>
-                            </label>
-                            <input
-                                type="email"
-                                name="email"
-                                placeholder="email@example.com"
-                                className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        {/* Account Type Selection */}
-                        <div className="form-control w-full">
-                            <label className="label pb-2">
-                                <span className="label-text text-sm font-semibold text-base-content">Account Type</span>
-                            </label>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <label className="cursor-pointer">
-                                    <div className={formData.role === "user" ? "p-4 border-2 border-primary bg-primary/5 rounded-lg" : "p-4 border-2 border-base-300 rounded-lg hover:border-primary/50"}>
-                                        <div className="flex items-center gap-3">
-                                            <input
-                                                type="radio"
-                                                name="role"
-                                                value="user"
-                                                className="radio radio-primary"
-                                                checked={formData.role === "user"}
-                                                onChange={handleChange}
-                                            />
-                                            <div className="flex-1">
-                                                <div className="font-semibold text-base">👤 Regular User</div>
-                                                <div className="text-xs text-base-content/70 mt-1">Individual seeking or providing help</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </label>
-                                <label className="cursor-pointer">
-                                    <div className={formData.role === "ngo" ? "p-4 border-2 border-primary bg-primary/5 rounded-lg" : "p-4 border-2 border-base-300 rounded-lg hover:border-primary/50"}>
-                                        <div className="flex items-center gap-3">
-                                            <input
-                                                type="radio"
-                                                name="role"
-                                                value="ngo"
-                                                className="radio radio-primary"
-                                                checked={formData.role === "ngo"}
-                                                onChange={handleChange}
-                                            />
-                                            <div className="flex-1">
-                                                <div className="font-semibold text-base">🏢 NGO/Organization</div>
-                                                <div className="text-xs text-base-content/70 mt-1">Registered organization</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        {/* NGO Details - Only show if role is NGO */}
-                        {formData.role === "ngo" && (
-                            <>
-                                <div className="divider my-6">NGO Information</div>
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    <div className="form-control w-full">
-                                        <label className="label pb-2">
-                                            <span className="label-text text-sm font-semibold text-base-content">Organization Name</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="ngoDetails.organizationName"
-                                            placeholder="e.g., Red Crescent Society"
-                                            className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                                            value={formData.ngoDetails.organizationName}
-                                            onChange={handleChange}
-                                            required={formData.role === "ngo"}
-                                        />
-                                    </div>
-                                    <div className="form-control w-full">
-                                        <label className="label pb-2">
-                                            <span className="label-text text-sm font-semibold text-base-content">Registration Number</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="ngoDetails.registrationNumber"
-                                            placeholder="e.g., NGO-12345"
-                                            className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                                            value={formData.ngoDetails.registrationNumber}
-                                            onChange={handleChange}
-                                            required={formData.role === "ngo"}
-                                        />
-                                    </div>
-                                </div>
-                            </>
-                        )}
-
-                        {/* Password */}
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="form-control w-full">
-                                <label className="label pb-2">
-                                    <span className="label-text text-sm font-semibold text-base-content">Password</span>
-                                </label>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    placeholder="Min 6 characters"
-                                    className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    required
-                                    minLength={6}
-                                />
-                            </div>
-                            <div className="form-control w-full">
-                                <label className="label pb-2">
-                                    <span className="label-text text-sm font-semibold text-base-content">Confirm Password</span>
-                                </label>
-                                <input
-                                    type="password"
-                                    name="confirmPassword"
-                                    placeholder="Re-enter password"
-                                    className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        {/* Location */}
-                        <div className="divider my-6">Location Information</div>
-                        <div className="grid md:grid-cols-3 gap-6">
-                            <div className="form-control w-full">
-                                <label className="label pb-2">
-                                    <span className="label-text text-sm font-semibold text-base-content">District</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    name="location.district"
-                                    placeholder="e.g., Dhaka"
-                                    className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                                    value={formData.location.district}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div className="form-control w-full">
-                                <label className="label pb-2">
-                                    <span className="label-text text-sm font-semibold text-base-content">Thana/Upazila</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    name="location.thana"
-                                    placeholder="e.g., Mirpur"
-                                    className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                                    value={formData.location.thana}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div className="form-control w-full">
-                                <label className="label pb-2">
-                                    <span className="label-text text-sm font-semibold text-base-content">Ward/Area</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    name="location.ward"
-                                    placeholder="e.g., Ward 10"
-                                    className="input input-bordered input-primary w-full focus:input-primary focus:ring-2 focus:ring-primary/50 transition-all"
-                                    value={formData.location.ward}
-                                    onChange={handleChange}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="form-control w-full mt-8">
+                    <div className="relative z-10">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-4 text-center">Identity Selection</p>
+                        <div className="grid grid-cols-2 gap-3">
                             <button
-                                type="submit"
-                                className={`btn btn-primary btn-lg w-full rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all ${loading ? "loading" : ""}`}
-                                disabled={loading}
+                                type="button"
+                                onClick={() => setFormData({ ...formData, role: 'user' })}
+                                className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${formData.role === 'user' ? 'bg-white text-indigo-700 border-white shadow-xl' : 'border-white/10 hover:border-white/20 text-white'}`}
                             >
-                                {loading ? "Creating account..." : (
-                                    <>
-                                        <span className="text-xl mr-2">🚀</span>
-                                        Create Account
-                                    </>
-                                )}
+                                <span className="text-2xl">👤</span>
+                                <span className="font-bold text-[10px] uppercase tracking-wider">Helper</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, role: 'ngo' })}
+                                className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${formData.role === 'ngo' ? 'bg-white text-indigo-700 border-white shadow-xl' : 'border-white/10 hover:border-white/20 text-white'}`}
+                            >
+                                <span className="text-2xl">🏢</span>
+                                <span className="font-bold text-[10px] uppercase tracking-wider">NGO</span>
                             </button>
                         </div>
-                    </form>
-
-                    <div className="divider my-6">OR</div>
-
-                    <div className="text-center">
-                        <p className="text-sm text-base-content/70 mb-2">
-                            Already have an account?
-                        </p>
-                        <Link
-                            to="/login"
-                            className="btn btn-outline btn-primary btn-sm rounded-full hover:scale-105 transition-all"
-                        >
-                            Sign In
-                        </Link>
                     </div>
+
+                    {/* Background decoration */}
+                    <div className="absolute top-0 right-0 w-full h-full opacity-5 pointer-events-none">
+                        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <path d="M0 100 C 20 0 50 0 100 100 Z" fill="currentColor" />
+                        </svg>
+                    </div>
+                </div>
+
+                {/* Right Side: Detailed Form */}
+                <div className="flex-1 p-8 md:p-12 flex flex-col justify-center bg-white">
+                    <div className="mb-6">
+                        <h2 className="text-2xl font-black text-slate-800 mb-1 tracking-tight">Create Account</h2>
+                        <p className="text-slate-500 text-sm font-medium">Fill in the details to join the community.</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="form-control">
+                                <label className="label pt-0"><span className="label-text text-slate-400 font-bold text-[10px] uppercase tracking-wider">Full Name</span></label>
+                                <input type="text" name="name" placeholder="John Doe" className="bg-slate-50 border-slate-200 text-slate-900 w-full rounded-2xl py-3 px-4 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all border" value={formData.name} onChange={handleChange} required />
+                            </div>
+                            <div className="form-control">
+                                <label className="label pt-0"><span className="label-text text-slate-400 font-bold text-[10px] uppercase tracking-wider">Phone Number</span></label>
+                                <input type="tel" name="phone" placeholder="01XXX-XXXXXX" className="bg-slate-50 border-slate-200 text-slate-900 w-full rounded-2xl py-3 px-4 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all border" value={formData.phone} onChange={handleChange} required />
+                            </div>
+
+                            <div className="form-control sm:col-span-2">
+                                <label className="label pt-0"><span className="label-text text-slate-400 font-bold text-[10px] uppercase tracking-wider">Email Address</span></label>
+                                <input type="email" name="email" placeholder="you@example.com" className="bg-slate-50 border-slate-200 text-slate-900 w-full rounded-2xl py-3 px-4 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all border" value={formData.email} onChange={handleChange} required />
+                            </div>
+
+                            {formData.role === "ngo" && (
+                                <div className="sm:col-span-2 grid grid-cols-2 gap-4 p-5 bg-indigo-50 rounded-2xl border border-indigo-100 animate-slide-up">
+                                    <div className="form-control">
+                                        <label className="label pt-0"><span className="label-text text-indigo-600 font-bold text-[10px] uppercase tracking-wider">Org Name</span></label>
+                                        <input type="text" name="ngoDetails.organizationName" className="bg-white border-indigo-200 text-slate-900 w-full rounded-xl py-2 px-4 focus:ring-2 focus:ring-indigo-500 outline-none transition-all border" value={formData.ngoDetails.organizationName} onChange={handleChange} required />
+                                    </div>
+                                    <div className="form-control">
+                                        <label className="label pt-0"><span className="label-text text-indigo-600 font-bold text-[10px] uppercase tracking-wider">Reg Number</span></label>
+                                        <input type="text" name="ngoDetails.registrationNumber" className="bg-white border-indigo-200 text-slate-900 w-full rounded-xl py-2 px-4 focus:ring-2 focus:ring-indigo-500 outline-none transition-all border" value={formData.ngoDetails.registrationNumber} onChange={handleChange} required />
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="form-control">
+                                <label className="label pt-0"><span className="label-text text-slate-400 font-bold text-[10px] uppercase tracking-wider">Password</span></label>
+                                <input type="password" name="password" className="bg-slate-50 border-slate-200 text-slate-900 w-full rounded-2xl py-3 px-4 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all border" value={formData.password} onChange={handleChange} required minLength={6} />
+                            </div>
+                            <div className="form-control">
+                                <label className="label pt-0"><span className="label-text text-slate-400 font-bold text-[10px] uppercase tracking-wider">Confirm</span></label>
+                                <input type="password" name="confirmPassword" className="bg-slate-50 border-slate-200 text-slate-900 w-full rounded-2xl py-3 px-4 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all border" value={formData.confirmPassword} onChange={handleChange} required />
+                            </div>
+
+                            <div className="sm:col-span-2 pt-2">
+                                <div className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                                    <span className="h-px flex-1 bg-slate-100"></span>
+                                    <span>Primary Location</span>
+                                    <span className="h-px flex-1 bg-slate-100"></span>
+                                </div>
+                                <div className="grid grid-cols-3 gap-3">
+                                    <input type="text" name="location.district" placeholder="District" className="bg-slate-50 border-slate-200 text-slate-900 text-xs rounded-xl py-3 px-3 outline-none focus:ring-1 focus:ring-indigo-500 transition-all border" value={formData.location.district} onChange={handleChange} required />
+                                    <input type="text" name="location.thana" placeholder="Thana" className="bg-slate-50 border-slate-200 text-slate-900 text-xs rounded-xl py-3 px-3 outline-none focus:ring-1 focus:ring-indigo-500 transition-all border" value={formData.location.thana} onChange={handleChange} required />
+                                    <input type="text" name="location.ward" placeholder="Ward" className="bg-slate-50 border-slate-200 text-slate-900 text-xs rounded-xl py-3 px-3 outline-none focus:ring-1 focus:ring-indigo-500 transition-all border" value={formData.location.ward} onChange={handleChange} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-6">
+                            <button
+                                type="submit"
+                                className={`w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold rounded-2xl shadow-xl shadow-indigo-500/20 transform active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
+                                disabled={loading}
+                            >
+                                {loading && <span className="loading loading-spinner loading-sm"></span>}
+                                {loading ? "SETTING UP..." : "CREATE ACCOUNT"}
+                            </button>
+
+                            <p className="mt-6 text-center text-slate-500 text-sm font-medium">
+                                Joined already? <Link to="/login" className="text-indigo-600 font-black hover:text-indigo-500 transition-colors">Sign In here</Link>
+                            </p>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
